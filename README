@@ -1,0 +1,50 @@
+This is a Thumbstick controller for use as a plugin for ImpactJS.
+
+To use:
+
+Place the thumbpad.js file in your lib/plugins directory.  In your main.js file, add this to the requires.. " 'plugins.thumbpad' ".
+
+Next, edit your Game class to add the functionality…an example follows:
+
+	gravity: 300, // All entities are affected by this
+	// Load a font
+	font: new ig.Font( 'media/04b03.font.png' ),
+	clearColor: '#FFFFFF',
+	thumbControl: new Control(),  //THIS WILL INITIALIZE YOUR CONTROL AND ALLOW IT TO BE ACCESSED FOR MOVEMENT
+	init: function() {
+		// Bind keys
+		ig.input.bind( ig.KEY.LEFT_ARROW, 'left' );
+		…...
+
+
+               
+		var jpad = this.thumbControl.thumbPad;
+		
+		this.thumbControl.setScreenWidth(ig.system.width);
+		jpad.setContext(ig.system.context);
+		jpad.setColor('black');
+		jpad.location = 0;  //0 = LEFT SIDE, 1 = RIGHT SIDE
+		this.thumbControl.setUpControls(); //THIS INITIALIZES THE TOUCH EVENTS
+               
+		
+		// Load the LevelTest as required above ('game.level.test')
+		this.loadLevel( LevelTest );
+	},
+
+In your game's draw function, add this line:
+	this.thumbControl.update();
+
+
+Lastly, you will need to adapt your entity to use this control.  Add code in the player entity's update function to query the control for its state:
+
+In this example, I only care about the left and right properties…
+		var thumbControl = ig.game.thumbControl;
+		var control = thumbControl.thumbPad;
+		if(control.getVector().getMoveDirections().LEFT)
+			goLeft = true;
+		if(control.getVector().getMoveDirections().RIGHT)	
+			goRight = true; 
+
+UP and DOWN are also supported, and moving to the UP and RIGHT will cause both to be true, as an example.  In addition, you may query the intensity of the stick movement (how far the user moved it) by querying the vector for intensityOfXDelta() or intensityOfYDelta().
+
+I'll add more documentation soon, but that should be enough to get you up and running with it.  In theory, it should support twin stick controllers.  This has not been tested yet (on my list for this week) so use it for that at your own risk.  In addition, it will not work with IOSImpact, as it draws directly onto the screen.  It also will not work out of the box with DirectCanvas, but I intend on working out what needs to be done to get it working with that soon.
