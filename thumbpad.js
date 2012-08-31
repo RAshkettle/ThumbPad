@@ -74,11 +74,12 @@ ig.module(
         if(_thumbPad.touchId<0){
             for(var i = 0; i<e.changedTouches.length; i++){
                 var touch = e.changedTouches[i];
-                if(shouldDisplayControl(touch.clientX, _thumbPad)){
+                        var traslatedPos = new TraslatePos(touch);
+                        if(shouldDisplayControl(traslatedPos.getX(), _thumbPad)){
                     _thumbPad.touchId = touch.identifier; 
                     _thumbPad.activate();
                     vector = new Vector();
-                    vector.initializeVector(touch.clientX, touch.clientY);
+                            vector.initializeVector(traslatedPos.getX(), traslatedPos.getY());
                     _thumbPad.updateVector(vector);
                     break;
                 } 
@@ -94,7 +95,8 @@ ig.module(
                 var touch = e.touches[i]; 
                     if(_thumbPad.touchId == touch.identifier){
                         var vector = _thumbPad.getVector();
-                        vector.endPoint.init(touch.clientX, touch.clientY);
+                        var traslatedPos = new TraslatePos(touch);
+                        vector.endPoint.init(traslatedPos.getX(), traslatedPos.getY());
                         _thumbPad.updateVector(vector);
                         break;
                     }
@@ -201,13 +203,15 @@ Vector = function(){
             var xMovement = _endPoint.getX() - _startPoint.getX();
             var yMovement = _endPoint.getY() - _startPoint.getY();
 
-            if(xMovement > 0)
+                //we subtract 13 pixels here for making the pad
+                // less sensitive
+                if(xMovement > 13)
                 movement.RIGHT = true;
-            if(xMovement < 0)
+                if(xMovement < -13)
                 movement.LEFT = true;
-            if(yMovement > 0)
+                if(yMovement < -13)
                 movement.UP = true;
-            if(yMovement < 0)
+                if(yMovement > 13)
                 movement.DOWN = true;
 
             return movement;
@@ -296,6 +300,23 @@ Joypad = function(){
         }
 
     return this;
+};
+
+//Simple position translator for when canvas has an offset
+var _getX = function() {
+    return this.touch.clientX - this.touch.target.offsetLeft;
+};
+
+var _getY = function() {
+    return this.touch.clientY - this.touch.target.offsetTop;
+};
+
+var TraslatePos = function(touch) {
+    return {
+        touch: touch,
+        getX : _getX,
+        getY : _getY
+    };
 };
 
 });
